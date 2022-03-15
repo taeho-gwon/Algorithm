@@ -31,8 +31,8 @@ bool solve(long long a_, long long b_, long long s_) {
     if (b == 0)return s % a == 0;
     ll x, y, g = egcd(a, b, s, x, y);
     if (s % g != 0) return false;
-    for (ll i = -g * x / b; i <= g * y / a; i++) {
-        if (gcd(x + i * b / g, y - i * a / g) == 1)
+    for (ll i = 0; i <= g * x / b; i++) {
+        if (gcd(x - i * b / g, y + i * a / g) == 1)
             return true;
     }
     return false;
