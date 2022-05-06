@@ -6,8 +6,7 @@ using namespace std;
 template<class TDATA, class TLAZY>
 class LazySegTree {
 private:
-    int n;
-    int h;
+    int n, h;
     vector<TDATA> data;
     vector<TLAZY> lazy;
     TDATA id_data;
@@ -17,7 +16,6 @@ private:
     function<TLAZY(TLAZY, TLAZY)> compose;
 
     void down(int p) {
-        p += n;
         for (int s = h; s > 0; s--) {
             int now = p >> s;
             if (lazy[now] != id_lazy) {
@@ -29,8 +27,7 @@ private:
     }
 
     void up(int p) {
-        p += n;
-        for (int sz = 2; p >>= 1; sz <<= 1) {
+        while(p >>= 1) {
             data[p] = merge(data[p << 1], data[p << 1 | 1]);
             if (p < n) data[p] = action(lazy[p], data[p]);
         }
@@ -51,11 +48,7 @@ public:
         merge(_merge), action(_action), compose(_compose) {
         data.resize(n << 1, id_data);
         lazy.resize(n, id_lazy);
-        h = 0;
-        while (_n) {
-            _n >>= 1;
-            h++;
-        }
+        for (h = 1; _n >>= 1; h++);
     }
 
     void initialize(vector<TDATA> &data_init) {
@@ -65,9 +58,10 @@ public:
 
     void modify(int l, int r, TLAZY value) {
         if (value == id_lazy) return;
+        l += n, r += n;
         down(l);
         down(r - 1);
-        for (int ll = l + n, rr = r + n; ll < rr; ll >>= 1, rr >>= 1) {
+        for (int ll = l, rr = r; ll < rr; ll >>= 1, rr >>= 1) {
             if (ll & 1) apply(ll++, value);
             if (rr & 1) apply(--rr, value);
         }
@@ -76,11 +70,12 @@ public:
     }
 
     TDATA query(int l, int r) {
+        l +=n, r += n;
         down(l);
         down(r - 1);
 
-        TDATA ansl = id_data, ansr = id_data;
-        for (l += n, r += n; l < r; l >>= 1, r >>= 1) {
+        TDATA ansl, ansr;
+        for (ansl = ansr = id_data; l < r; l >>= 1, r >>= 1) {
             if (l & 1) ansl = merge(ansl, data[l++]);
             if (r & 1) ansr = merge(data[--r], ansr);
         }
