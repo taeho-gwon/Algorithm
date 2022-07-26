@@ -1,0 +1,1 @@
+main(n,a){for(a=-scanf("%d",&n);n--;a=(2*a+5)%1000000007);printf("%d",a);}
